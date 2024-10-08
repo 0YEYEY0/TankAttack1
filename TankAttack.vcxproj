@@ -128,17 +128,27 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Grafo.h" />
+    <ClInclude Include="Mov.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Tank.h" />
     <ClInclude Include="TankAttack.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TankAttack.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TankAttack.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\OneDrive\Pictures\Capturas de pantalla\amarillo.png" />
+    <Image Include="..\..\..\OneDrive\Pictures\Capturas de pantalla\azul.png" />
+    <Image Include="..\..\..\OneDrive\Pictures\Capturas de pantalla\bala.png" />
+    <Image Include="..\..\..\OneDrive\Pictures\Capturas de pantalla\celeste.png" />
+    <Image Include="..\..\..\OneDrive\Pictures\Capturas de pantalla\piedra.png" />
+    <Image Include="..\..\..\OneDrive\Pictures\Capturas de pantalla\rojo.png" />
+    <Image Include="..\..\..\OneDrive\Pictures\Capturas de pantalla\tierra.png" />
     <Image Include="small.ico" />
     <Image Include="TankAttack.ico" />
   </ItemGroup>
