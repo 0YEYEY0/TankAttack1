@@ -12,7 +12,6 @@ std::vector<int> Dijkstra(const Grafo& grafo, int start) {
     dist[start] = 0;  // La distancia al nodo inicial es 0
 
     for (int count = 0; count < N * N; count++) {
-        // Encontrar el nodo con la distancia mínima que no ha sido visitado
         int u = -1;
         for (int i = 0; i < N * N; i++) {
             if (!visited[i] && (u == -1 || dist[i] < dist[u])) {
@@ -26,8 +25,8 @@ std::vector<int> Dijkstra(const Grafo& grafo, int start) {
 
         // Actualizar las distancias de los vecinos
         for (int v = 0; v < N * N; v++) {
-            if (grafo.adj[u][v] != 0 && !visited[v] && dist[u] + grafo.adj[u][v] < dist[v]) {
-                dist[v] = dist[u] + grafo.adj[u][v];
+            if (grafo.adjMatrix[u][v] != 0 && !visited[v] && dist[u] + grafo.adjMatrix[u][v] < dist[v]) {
+                dist[v] = dist[u] + grafo.adjMatrix[u][v];
             }
         }
     }
@@ -49,7 +48,7 @@ std::vector<int> BFS(const Grafo& grafo, int start) {
 
         // Visitar los vecinos del nodo actual
         for (int v = 0; v < N * N; v++) {
-            if (grafo.adj[u][v] != 0 && dist[v] == -1) {  // Nodo no visitado
+            if (grafo.adjMatrix[u][v] != 0 && dist[v] == -1) {  // Nodo no visitado
                 dist[v] = dist[u] + 1;
                 q.push(v);
             }
