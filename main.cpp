@@ -13,6 +13,8 @@ Tank* selectedTank = nullptr;  // Tanque seleccionado para algoritmo
 bool isPlayer1Turn = true;  // Para manejar el turno
 int remainingTime = 300;  // Tiempo restante en segundos (5 minutos)
 
+HWND hRouteText;  // Control para mostrar el recorrido
+
 void MoveTankRandom(Tank* tank);  // Declaración de función para movimiento aleatorio
 
 // Prototipos
@@ -37,7 +39,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     grafo = new Grafo(N);  // Crear el grafo con obstáculos
     srand((unsigned)time(0));  // Inicializar random
 
-    HWND hwnd = CreateWindow(L"TankAttackWindow", L"Tank Attack Game", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 500, 500, NULL, NULL, hInst, NULL);
+    HWND hwnd = CreateWindow(L"TankAttackWindow", L"Tank Attack Game", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 500, 600, NULL, NULL, hInst, NULL);
 
     // Iniciar temporizador (1 segundo = 1000ms)
     SetTimer(hwnd, 1, 1000, NULL);
@@ -92,6 +94,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         hMoveButtons[2] = CreateWindow(L"BUTTON", L"Mov Rojo", WS_VISIBLE | WS_CHILD, 400, 170, 120, 50, hwnd, (HMENU)1003, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
         hMoveButtons[3] = CreateWindow(L"BUTTON", L"Mov Azul", WS_VISIBLE | WS_CHILD, 400, 230, 120, 50, hwnd, (HMENU)1004, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
 
+        // Crear un cuadro de texto para mostrar el recorrido
+        hRouteText = CreateWindow(L"EDIT", NULL, WS_VISIBLE | WS_CHILD | ES_MULTILINE | ES_READONLY, 50, 350, 400, 100, hwnd, NULL, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
+
         // Crear tanques y colocar en el grafo
         tanks.push_back(new CelesteTank(*grafo, hwnd, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE)));
         tanks.push_back(new AmarilloTank(*grafo, hwnd, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE)));
@@ -111,6 +116,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             // Verificar el turno del jugador
             if ((isPlayer1Turn && (id == 1003 || id == 1004)) || (!isPlayer1Turn && (id == 1001 || id == 1002))) {
                 int randomNum = rand() % 100;
+
+                // Limpiar el cuadro de texto al inicio del nuevo turno
+                SetWindowText(hRouteText, L"");
 
                 if (id == 1001 || id == 1004) {
                     // Celeste/Azul: 50% BFS, 50% movimiento aleatorio
@@ -149,15 +157,15 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             std::vector<int> distances;
 
             if (selectedTank->tankText == L"TCE" || selectedTank->tankText == L"TAZ") {
-                distances = BFS(*grafo, selectedTank->x * N + selectedTank->y);
+                distances = BFS(*grafo, selectedTank->x * N + selectedTank->y, id, hRouteText);
             }
             else if (selectedTank->tankText == L"TAM" || selectedTank->tankText == L"TRO") {
-                distances = Dijkstra(*grafo, selectedTank->x * N + selectedTank->y);
+                distances = Dijkstra(*grafo, selectedTank->x * N + selectedTank->y, id, hRouteText);
             }
 
             if (!distances.empty()) {
                 ClearOldPosition(selectedTank, hwnd);  // Liberar posición actual
-                MoveTank(selectedTank, distances, id);
+                MoveTank(selectedTank, distances, id);  // Mover el tanque
                 UpdateButton(selectedTank, hwnd, selectedTank->x, selectedTank->y);  // Actualizar el botón después del movimiento
                 selectedTank = nullptr;
                 isPlayer1Turn = !isPlayer1Turn;  // Cambiar turno después del movimiento
