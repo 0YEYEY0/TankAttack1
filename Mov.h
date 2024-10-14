@@ -6,7 +6,7 @@
 #include <algorithm>
 #include "Grafo.h"
 
-// Función para encontrar el camino más corto usando Dijkstra
+// Funci?n para encontrar el camino m?s corto usando Dijkstra
 std::vector<int> Dijkstra(const Grafo& grafo, int start, int target, HWND hRouteText) {
     int N = grafo.N;
     std::vector<int> dist(N * N, std::numeric_limits<int>::max());  // Distancias
@@ -22,7 +22,7 @@ std::vector<int> Dijkstra(const Grafo& grafo, int start, int target, HWND hRoute
             }
         }
 
-        if (dist[u] == std::numeric_limits<int>::max()) break;  // No hay más nodos alcanzables
+        if (dist[u] == std::numeric_limits<int>::max()) break;  // No hay m?s nodos alcanzables
 
         visited[u] = true;
 
@@ -56,7 +56,7 @@ std::vector<int> Dijkstra(const Grafo& grafo, int start, int target, HWND hRoute
     return dist;
 }
 
-// Función para realizar búsqueda en anchura (BFS)
+// Funci?n para realizar b?squeda en anchura (BFS)
 std::vector<int> BFS(const Grafo& grafo, int start, int target, HWND hRouteText) {
     int N = grafo.N;
     std::vector<int> dist(N * N, -1);  // Distancias (inicialmente -1 para nodos no alcanzables)

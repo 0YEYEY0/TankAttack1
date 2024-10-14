@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Bala.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Grafo.h" />
     <ClInclude Include="Mov.h" />

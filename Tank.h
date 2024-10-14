@@ -8,9 +8,10 @@ public:
     int x, y;  // Posición del tanque en el grafo
     std::wstring tankText;  // Texto que representa el tanque (e.g., "TCE" para tanque celeste)
     HWND hButton;  // El botón que representa el tanque
+    int damage;  // Daño recibido por el tanque
 
     // Constructor
-    Tank(const std::wstring& text, Grafo& grafo, HWND parent, HINSTANCE hInst) : tankText(text) {
+    Tank(const std::wstring& text, Grafo& grafo, HWND parent, HINSTANCE hInst) : tankText(text), damage(0) {
         placeRandomly(grafo);
         createButton(parent, hInst);
     }
