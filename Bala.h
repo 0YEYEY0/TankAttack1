@@ -1,124 +1,136 @@
 #pragma once
 #include <windows.h>
 #include <vector>
+#include <queue>
 #include <cmath>
-#include <thread>  // Para usar std::this_thread::sleep_for
-#include <chrono>  // Para controlar el tiempo
+#include <thread>
+#include <chrono>
 #include "Tank.h"
 #include "Grafo.h"
 
 class Bala {
 public:
-    int startX, startY;  // Posición inicial del disparo
-    int targetX, targetY;  // Posición objetivo
-    double angle;  // Ángulo de la bala
-    bool hasHit;  // Indica si la bala ha impactado
-    Tank* shooter;  // Tanque que disparó
-    HWND hRouteText;  // Cuadro de texto donde se mostrará la trayectoria
-    HWND hDamageText; // Cuadro de texto donde se mostrará el daño total
-    Grafo& grafo;  // Referencia al grafo
-    std::vector<Tank*>& tanks;  // Referencia a los tanques
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
+    int startX, startY;
+    int targetX, targetY;
+    bool hasHit;
+    Tank* shooter;
+    HWND hRouteText;
+    HWND hDamageText;
+    Grafo& grafo;
+    std::vector<Tank*>& tanks;
 
     // Constructor de la bala
     Bala(Tank* t, int tx, int ty, HWND routeText, HWND damageText, Grafo& g, std::vector<Tank*>& ts)
         : shooter(t), targetX(tx), targetY(ty), hRouteText(routeText), hDamageText(damageText), grafo(g), tanks(ts) {
         startX = shooter->x;
         startY = shooter->y;
-        angle = calculateAngle();
         hasHit = false;
     }
 
-    // Función para calcular el ángulo de la bala (línea de vista)
-    double calculateAngle() {
-        double dx = targetX - startX;
-        double dy = targetY - startY;
-        return atan2(dy, dx);
+    // Estructura para representar las celdas del grafo
+    struct Cell {
+        int x, y;
+        std::vector<Cell> path;  // Mantener el camino hacia la celda
+    };
+
+    // Función BFS para encontrar el camino de la bala hasta el objetivo
+    std::vector<Cell> BFS(int startX, int startY, int targetX, int targetY) {
+        std::vector<std::vector<bool>> visited(grafo.N, std::vector<bool>(grafo.N, false));
+        std::queue<Cell> q;
+        q.push({ startX, startY, {} });
+        visited[startX][startY] = true;
+
+        // Movimientos posibles: arriba, abajo, izquierda, derecha
+        int moves[4][2] = { {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
+
+        while (!q.empty()) {
+            Cell current = q.front();
+            q.pop();
+
+            // Si alcanzamos el objetivo, devolver el camino
+            if (current.x == targetX && current.y == targetY) {
+                return current.path;
+            }
+
+            // Explorar celdas adyacentes
+            for (auto& move : moves) {
+                int newX = current.x + move[0];
+                int newY = current.y + move[1];
+
+                // Verificar si la nueva celda está dentro de los límites y no es un obstáculo
+                if (newX >= 0 && newX < grafo.N && newY >= 0 && newY < grafo.N && grafo.grid[newX][newY] != 'X' && !visited[newX][newY]) {
+                    visited[newX][newY] = true;
+                    Cell nextCell = { newX, newY, current.path };
+                    nextCell.path.push_back({ newX, newY });
+                    q.push(nextCell);
+                }
+            }
+        }
+
+        // Si no se encuentra un camino, devolver un vector vacío
+        return {};
     }
 
-    // Función para mover la bala y detectar colisiones
+    // Función para mover la bala usando BFS
     void moveBala() {
-        int currentX = startX;
-        int currentY = startY;
-        double stepX = cos(angle);  // Paso en el eje X basado en el ángulo
-        double stepY = sin(angle);  // Paso en el eje Y basado en el ángulo
-        bool hasBounced = false;  // Para rastrear si la bala ya rebotó
+        // Obtener el camino usando BFS
+        std::vector<Cell> path = BFS(startX, startY, targetX, targetY);
+        if (path.empty()) {
+            SetWindowText(hRouteText, L"No se encontró un camino");
+            return;
+        }
 
-        std::wstring path = L"Trayectoria de la bala: ";
+        std::wstring pathText = L"Trayectoria de la bala: ";
         HWND hButton = nullptr;
 
-        while (!hasHit) {
-            // Mover la bala
-            currentX += static_cast<int>(stepX);
-            currentY += static_cast<int>(stepY);
-
-            // Verificar si la bala se sale de los límites del grafo (rebote)
-            if (currentX < 0 || currentX >= grafo.N || currentY < 0 || currentY >= grafo.N) {
-                if (hasBounced) {
-                    break;  // Si ya rebotó antes, la bala desaparece
-                }
-                angle = reflectAngle(angle);  // Rebotar la bala
-                stepX = cos(angle);
-                stepY = sin(angle);
-                hasBounced = true;
-            }
-
-            // Verificar si la bala golpea un obstáculo
-            if (grafo.grid[currentX][currentY] == 'X') {
-                if (hasBounced) {
-                    break;  // Si ya rebotó antes, la bala desaparece
-                }
-                angle = reflectAngle(angle);  // Rebotar en la pared
-                stepX = cos(angle);
-                stepY = sin(angle);
-                hasBounced = true;
-            }
-
-            // Agregar la nueva posición al trayecto
-            path += L"(" + std::to_wstring(currentX) + L", " + std::to_wstring(currentY) + L") ";
-
+        // Recorrer el camino y mostrar la bala moviéndose
+        for (auto& cell : path) {
             // Mostrar la "Q" en el botón de la posición actual
-            hButton = GetDlgItem(GetParent(hRouteText), currentX * grafo.N + currentY);
+            hButton = GetDlgItem(GetParent(hRouteText), cell.x * grafo.N + cell.y);
             if (hButton) {
                 SetWindowText(hButton, L"Q");
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));  // Pausa de 0.5 segundos
                 SetWindowText(hButton, L"O");  // Restaurar la celda a su estado original después de que la bala pasa
             }
 
+            // Agregar la posición al texto de la trayectoria
+            pathText += L"(" + std::to_wstring(cell.x) + L", " + std::to_wstring(cell.y) + L") ";
+
             // Verificar si la bala golpea un tanque
             for (Tank* tank : tanks) {
-                if (tank->x == currentX && tank->y == currentY) {
-                    applyDamage(tank);  // Aplicar daño
+                if (tank->x == cell.x && tank->y == cell.y) {
+                    applyDamage(tank);  // Aplicar daño al tanque
                     hasHit = true;
-                    break;
+                    SetWindowText(hRouteText, pathText.c_str());
+                    return;
                 }
             }
         }
 
-        // Mostrar la trayectoria de la bala en la interfaz
-        SetWindowText(hRouteText, path.c_str());
+        // Mostrar la trayectoria completa en la interfaz
+        SetWindowText(hRouteText, pathText.c_str());
     }
 
     // Función para aplicar el daño al tanque
     void applyDamage(Tank* tank) {
-        if (tank->tankText == L"TCE" || tank->tankText == L"TAZ") {
-            tank->damage += 25;  // 25% de daño a tanques celeste y azul
+        std::wstring damageText;
+
+        // Aplicar el daño según el color del tanque
+        if (tank->tankText == L"TCE" || tank->tankText == L"TAZ") {  // Tanques celeste y azul
+            tank->health -= 25;  // 25% de daño
+            damageText = tank->tankText + L" recibe 25% de daño";
         }
-        else if (tank->tankText == L"TAM" || tank->tankText == L"TRO") {
-            tank->damage += 50;  // 50% de daño a tanques amarillo y rojo
+        else if (tank->tankText == L"TAM" || tank->tankText == L"TRO") {  // Tanques amarillo y rojo
+            tank->health -= 50;  // 50% de daño
+            damageText = tank->tankText + L" recibe 50% de daño";
         }
 
         // Mostrar el daño actualizado en la interfaz
-        std::wstring damageText = L"Daño recibido por " + tank->tankText + L": " + std::to_wstring(tank->damage) + L"%";
         SetWindowText(hDamageText, damageText.c_str());
-    }
 
-    // Función para reflejar la bala al chocar con una pared
-    double reflectAngle(double angle) {
-        return angle + M_PI / 2;  // Rebote de 90 grados
+        // Asegurarse de que la vida no baje de 0
+        if (tank->health < 0) {
+            tank->health = 0;
+        }
     }
 };
