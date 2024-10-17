@@ -3,6 +3,10 @@
 #include <string>
 #include "Grafo.h"
 
+// Variable global para rastrear el turno del jugador (1 o 2)
+int turnoJugador = 1;  // Comienza con el jugador 1 (rojo y azul)
+
+// Clase base Tank
 class Tank {
 public:
     int x, y;  // Posición del tanque en el grafo
@@ -64,3 +68,17 @@ public:
     AzulTank(Grafo& grafo, HWND parent, HINSTANCE hInst) : Tank(L"TAZ", grafo, parent, hInst) {}
 };
 
+// Función para cambiar de turno
+void cambiarTurno() {
+    turnoJugador = (turnoJugador == 1) ? 2 : 1;
+}
+
+// Función para verificar si es el turno del jugador correcto
+bool esTurnoDelJugador(Tank* tank) {
+    if (turnoJugador == 1) {
+        return tank->tankText == L"TRO" || tank->tankText == L"TAZ";  // Tanques de jugador 1 (rojo y azul)
+    }
+    else {
+        return tank->tankText == L"TAM" || tank->tankText == L"TCE";  // Tanques de jugador 2 (amarillo y celeste)
+    }
+}

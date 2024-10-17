@@ -138,6 +138,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             if (isMoving) {
                 MoveTankWithTrajectory(selectedTank, targetX, targetY, hwnd);  // Mover el tanque mostrando la trayectoria
                 isMoving = false;
+                cambiarTurno();  // Cambiar el turno después del movimiento
             }
 
             // Disparar la bala si el flag de disparo está activado
@@ -146,6 +147,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
                 bala.moveBala();
                 UpdateTankHealth();  // Actualizar la vida de los tanques después del disparo
                 isShooting = false;  // Desactivar flag de disparo
+                cambiarTurno();  // Cambiar el turno después de disparar
             }
 
             selectedTank = nullptr;  // Deseleccionar el tanque después de mover o disparar
@@ -154,19 +156,30 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         // Manejar la selección de tanque para mover
         if (id >= 2001 && id <= 2004) {
             selectedTank = tanks[id - 2001];  // Selecciona el tanque correspondiente para mover
-            isMoving = true;  // Activar flag de movimiento
-            MessageBox(hwnd, L"Selecciona una celda para mover el tanque", L"Movimiento", MB_OK);
+            if (esTurnoDelJugador(selectedTank)) {  // Verificar si es el turno del jugador
+                isMoving = true;  // Activar flag de movimiento
+                MessageBox(hwnd, L"Selecciona una celda para mover el tanque", L"Movimiento", MB_OK);
+            }
+            else {
+                MessageBox(hwnd, L"No es tu turno", L"Error", MB_OK);
+            }
         }
 
-        // Manejar la selección de tanque para mover
-        if (id >= 2001 && id <= 2004) {
-            selectedTank = tanks[id - 2001];  // Selecciona el tanque correspondiente para mover
-            isMoving = true;  // Activar flag de movimiento
-            moveTankWithProbabilities(selectedTank, *grafo, hwnd);  // Llama a la función de probabilidades
+        // Manejar la selección de tanque para disparar
+        if (id >= 1001 && id <= 1004) {
+            selectedTank = tanks[id - 1001];  // Selecciona el tanque correspondiente para disparar
+            if (esTurnoDelJugador(selectedTank)) {  // Verificar si es el turno del jugador
+                isShooting = true;  // Activar flag de disparo
+                MessageBox(hwnd, L"Selecciona una celda para disparar", L"Disparo", MB_OK);
+            }
+            else {
+                MessageBox(hwnd, L"No es tu turno", L"Error", MB_OK);
+            }
         }
 
         break;
     }
+
 
     case WM_TIMER: {
         // Actualizar el temporizador
