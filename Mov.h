@@ -192,3 +192,6 @@ void moveTankWithProbabilities(Tank* tank, Grafo& grafo, HWND hwnd) {
 
 
 
+
+
+

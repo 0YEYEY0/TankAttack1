@@ -20,6 +20,8 @@ int remainingTime = 300;  // Tiempo restante en segundos (5 minutos)
 HWND hRouteText;  // Cuadro de texto para mostrar la trayectoria de la bala
 HWND hDamageText;  // Cuadro de texto para mostrar el daño de los tanques
 HWND hTankHealth[4];  // Cuadros de texto para mostrar la vida de los 4 tanques
+HWND hTimerText;
+
 
 void MoveTankWithTrajectory(Tank* tank, int targetX, int targetY, HWND hwnd);  // Nueva función para mostrar la trayectoria
 void UpdateTankButton(Tank* tank, HWND hwnd);  // Declaración para actualizar el botón de los tanques
@@ -64,6 +66,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 
     return 0;
 }
+
+void iniciarTemporizador(HWND hwnd) {
+    // Configurar el temporizador para que dispare un mensaje WM_TIMER cada 1000 ms (1 segundo)
+    SetTimer(hwnd, 1, 1000, NULL);  // 1 segundo = 1000 ms
+}
+
 
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     static HWND hMoveButtons[4];  // Botones de movimiento para cada tanque
@@ -122,6 +130,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         tanks.push_back(new AmarilloTank(*grafo, hwnd, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE)));
         tanks.push_back(new RojoTank(*grafo, hwnd, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE)));
         tanks.push_back(new AzulTank(*grafo, hwnd, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE)));
+
+        hTimerText = CreateWindow(L"STATIC", L"Tiempo restante: 05:00", WS_VISIBLE | WS_CHILD, 500, 700, 200, 30, hwnd, NULL, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
+
+        iniciarTemporizador(hwnd);  // Iniciar el temporizador del juego
+
 
         break;
     }
@@ -184,12 +197,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     case WM_TIMER: {
         // Actualizar el temporizador
         if (remainingTime > 0) {
-            remainingTime--;
             UpdateTimer(hwnd);
         }
         else {
             KillTimer(hwnd, 1);  // Detener el temporizador cuando se acabe el tiempo
-            MessageBox(hwnd, L"¡El tiempo ha terminado!", L"Fin del juego", MB_OK);
         }
         break;
     }
@@ -267,6 +278,8 @@ void UpdateTankButton(Tank* tank, HWND hwnd) {
     }
 }
 
+
+
 // Función para actualizar la vida de los tanques en la interfaz
 void UpdateTankHealth() {
     // Asumiendo que la vida de los tanques está almacenada en cada objeto de tanque
@@ -289,8 +302,42 @@ void UpdateTankHealth() {
     SetWindowText(hTankHealth[3], healthText.c_str());
 }
 
-// Actualizar el temporizador en la ventana
 void UpdateTimer(HWND hwnd) {
-    std::wstring timerText = L"Tiempo restante: " + std::to_wstring(remainingTime / 60) + L":" + std::to_wstring(remainingTime % 60);
-    SetWindowText(hwnd, timerText.c_str());
+    --remainingTime;  // Decrementar tiempo restante
+
+    // Actualizar cuadro de texto del temporizador
+    wchar_t buffer[50];
+    swprintf(buffer, 50, L"Tiempo restante: %d:%02d", remainingTime / 60, remainingTime % 60);
+    SetWindowText(hTimerText, buffer);  // Actualizamos el nuevo cuadro de texto
+
+    if (remainingTime <= 0) {
+        // Condición de victoria por tiempo
+        int totalHealthP1 = tanks[0]->getHealth() + tanks[1]->getHealth();
+        int totalHealthP2 = tanks[2]->getHealth() + tanks[3]->getHealth();
+
+        if (totalHealthP1 > totalHealthP2) {
+            MessageBox(hwnd, L"Jugador 1 gana por salud restante", L"Victoria por tiempo", MB_OK);
+        }
+        else if (totalHealthP2 > totalHealthP1) {
+            MessageBox(hwnd, L"Jugador 2 gana por salud restante", L"Victoria por tiempo", MB_OK);
+        }
+        else {
+            MessageBox(hwnd, L"Empate", L"Resultado", MB_OK);
+        }
+
+        PostQuitMessage(0);  // Cerrar el juego
+    }
+
+    // Verificar victoria por eliminación
+    int tanksAliveP1 = (tanks[0]->getHealth() > 0) + (tanks[1]->getHealth() > 0);
+    int tanksAliveP2 = (tanks[2]->getHealth() > 0) + (tanks[3]->getHealth() > 0);
+
+    if (tanksAliveP1 == 0) {
+        MessageBox(hwnd, L"Jugador 2 gana por eliminación", L"Victoria por eliminación", MB_OK);
+        PostQuitMessage(0);  // Cerrar el juego
+    }
+    else if (tanksAliveP2 == 0) {
+        MessageBox(hwnd, L"Jugador 1 gana por eliminación", L"Victoria por eliminación", MB_OK);
+        PostQuitMessage(0);  // Cerrar el juego
+    }
 }

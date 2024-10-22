@@ -100,6 +100,14 @@ public:
             for (Tank* tank : tanks) {
                 if (tank->x == cell.x && tank->y == cell.y) {
                     applyDamage(tank);  // Aplicar daño al tanque
+
+                    // Verificar si algún jugador ha perdido después de aplicar el daño
+                    if (verificarDerrota(tanks)) {
+                        KillTimer(GetParent(hRouteText), 1);  // Detener el temporizador
+                        MessageBox(GetParent(hRouteText), L"Un jugador ha perdido", L"Fin del juego", MB_OK);
+                        return;  // Salir de la función si el juego termina
+                    }
+
                     hasHit = true;
                     SetWindowText(hRouteText, pathText.c_str());
                     return;
@@ -110,6 +118,7 @@ public:
         // Mostrar la trayectoria completa en la interfaz
         SetWindowText(hRouteText, pathText.c_str());
     }
+
 
     // Función para aplicar el daño al tanque
     void applyDamage(Tank* tank) {

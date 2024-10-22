@@ -2,9 +2,14 @@
 #include <windows.h>
 #include <string>
 #include "Grafo.h"
+#include <vector>
 
 // Variable global para rastrear el turno del jugador (1 o 2)
 int turnoJugador = 1;  // Comienza con el jugador 1 (rojo y azul)
+
+int vidaJugador1 = 0;  // Se inicializan después
+int vidaJugador2 = 0;  // Se inicializan después
+
 
 // Clase base Tank
 class Tank {
@@ -18,6 +23,11 @@ public:
     Tank(const std::wstring& text, Grafo& grafo, HWND parent, HINSTANCE hInst) : tankText(text), health(100) {
         placeRandomly(grafo);
         createButton(parent, hInst);
+    }
+
+    // Método para obtener la vida del tanque
+    int getHealth() const {
+        return health;
     }
 
     // Colocar el tanque en una celda vacía del grafo
@@ -82,3 +92,47 @@ bool esTurnoDelJugador(Tank* tank) {
         return tank->tankText == L"TAM" || tank->tankText == L"TCE";  // Tanques de jugador 2 (amarillo y celeste)
     }
 }
+
+// Función para obtener la vida total de un jugador
+int getVidaTotalJugador(int jugador, std::vector<Tank*>& tanks) {
+    int vidaTotal = 0;
+
+    if (jugador == 1) {
+        // Sumar la vida de los tanques del jugador 1 (tanques rojo y azul)
+        for (Tank* tank : tanks) {
+            if (tank->tankText == L"TRO" || tank->tankText == L"TAZ") {
+                vidaTotal += tank->getHealth();
+            }
+        }
+    }
+    else if (jugador == 2) {
+        // Sumar la vida de los tanques del jugador 2 (tanques amarillo y celeste)
+        for (Tank* tank : tanks) {
+            if (tank->tankText == L"TAM" || tank->tankText == L"TCE") {
+                vidaTotal += tank->getHealth();
+            }
+        }
+    }
+
+    return vidaTotal;
+}
+
+// Función para verificar si un jugador ha perdido (todos sus tanques tienen 0 de vida)
+bool verificarDerrota(std::vector<Tank*>& tanks) {
+    int vidaJugador1 = getVidaTotalJugador(1, tanks);
+    int vidaJugador2 = getVidaTotalJugador(2, tanks);
+
+    // Verificar si algún jugador tiene ambos tanques con 0 de vida
+    if (vidaJugador1 == 0) {
+        MessageBox(NULL, L"¡Jugador 2 ha ganado!", L"Fin del juego", MB_OK);
+        return true;  // Jugador 1 ha perdido
+    }
+    if (vidaJugador2 == 0) {
+        MessageBox(NULL, L"¡Jugador 1 ha ganado!", L"Fin del juego", MB_OK);
+        return true;  // Jugador 2 ha perdido
+    }
+
+    return false;
+}
+
+
