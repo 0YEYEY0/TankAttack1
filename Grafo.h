@@ -23,7 +23,7 @@ public:
         srand(static_cast<unsigned int>(time(0)));  // Inicializar generador de números aleatorios
         for (int i = 0; i < N; ++i) {
             for (int j = 0; j < N; ++j) {
-                if (rand() % 2 == 0) {  // Aproximadamente un 50% de probabilidad de ser obstáculo
+                if (rand() % 3 == 0) {  // Aproximadamente un 50% de probabilidad de ser obstáculo
                     grid[i][j] = 'X';  // Colocar un obstáculo
                 }
             }

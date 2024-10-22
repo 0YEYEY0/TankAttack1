@@ -149,7 +149,8 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
 
             // Mover el tanque si el flag de movimiento está activado
             if (isMoving) {
-                MoveTankWithTrajectory(selectedTank, targetX, targetY, hwnd);  // Mover el tanque mostrando la trayectoria
+                // Aquí llamamos a moveTankWithProbabilities en lugar de MoveTankWithTrajectory
+                moveTankWithProbabilities(selectedTank, *grafo, hwnd, targetX, targetY, hRouteText);
                 isMoving = false;
                 cambiarTurno();  // Cambiar el turno después del movimiento
             }
@@ -171,7 +172,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             selectedTank = tanks[id - 2001];  // Selecciona el tanque correspondiente para mover
             if (esTurnoDelJugador(selectedTank)) {  // Verificar si es el turno del jugador
                 isMoving = true;  // Activar flag de movimiento
-                MessageBox(hwnd, L"Selecciona una celda para mover el tanque", L"Movimiento", MB_OK);
             }
             else {
                 MessageBox(hwnd, L"No es tu turno", L"Error", MB_OK);
@@ -192,6 +192,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
 
         break;
     }
+
 
 
     case WM_TIMER: {

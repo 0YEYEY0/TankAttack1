@@ -145,16 +145,31 @@ void moveTankToEmptyCell(Tank* tank, const Grafo& grafo, HWND hRouteText) {
 }
 
 
-void moveTankWithProbabilities(Tank* tank, Grafo& grafo, HWND hwnd) {
+void moveTankWithProbabilities(Tank* tank, Grafo& grafo, HWND hwnd, int targetX, int targetY, HWND hRouteText) {
     srand(static_cast<unsigned int>(time(0)));  // Semilla para números aleatorios
     int randomValue = rand() % 100;  // Número aleatorio entre 0 y 99
+
+    int currentX = tank->x;
+    int currentY = tank->y;
+    int start = currentX * grafo.N + currentY;  // Posición inicial en el grafo
+    int target = targetX * grafo.N + targetY;   // Posición objetivo en el grafo
 
     if (tank->tankText == L"TCE" || tank->tankText == L"TAZ") {
         // Tanques celeste y azul (50% de usar BFS, 50% movimiento aleatorio)
         if (randomValue < 50) {
-            // Usar BFS y pedir al jugador que elija una celda
-            MessageBox(hwnd, L"Usando BFS. Selecciona una celda", L"Movimiento", MB_OK);
-            // Aquí llamas a la lógica de BFS
+            // Usar BFS y mover el tanque a la primera celda del camino
+            std::vector<int> path = BFS(grafo, start, target, hRouteText);
+
+            if (path.size() > 1) {
+                int nextPosition = path[1];  // Segunda posición en el camino (después de la inicial)
+                int nextX = nextPosition / grafo.N;
+                int nextY = nextPosition % grafo.N;
+
+                MoveTankWithTrajectory(tank, nextX, nextY, hwnd);
+            }
+            else {
+                MessageBox(hwnd, L"No se encontró un camino con BFS", L"Error de Movimiento", MB_OK);
+            }
         }
         else {
             // Mover a una celda vacía aleatoria
@@ -171,8 +186,18 @@ void moveTankWithProbabilities(Tank* tank, Grafo& grafo, HWND hwnd) {
     else if (tank->tankText == L"TAM" || tank->tankText == L"TRO") {
         // Tanques amarillo y rojo (80% de usar Dijkstra, 20% movimiento aleatorio)
         if (randomValue < 80) {
-            MessageBox(hwnd, L"Usando Dijkstra. Selecciona una celda", L"Movimiento", MB_OK);
-            // Aquí llamas a la lógica de Dijkstra
+            std::vector<int> path = Dijkstra(grafo, start, target, hRouteText);
+
+            if (path.size() > 1) {
+                int nextPosition = path[1];  // Segunda posición en el camino (después de la inicial)
+                int nextX = nextPosition / grafo.N;
+                int nextY = nextPosition % grafo.N;
+
+                MoveTankWithTrajectory(tank, nextX, nextY, hwnd);
+            }
+            else {
+                MessageBox(hwnd, L"No se encontró un camino con Dijkstra", L"Error de Movimiento", MB_OK);
+            }
         }
         else {
             // Mover a una celda vacía aleatoria
@@ -187,6 +212,7 @@ void moveTankWithProbabilities(Tank* tank, Grafo& grafo, HWND hwnd) {
         }
     }
 }
+
 
 
 

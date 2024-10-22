@@ -98,7 +98,7 @@ public:
 
             // Verificar si la bala golpea un tanque
             for (Tank* tank : tanks) {
-                if (tank->x == cell.x && tank->y == cell.y) {
+                if ((tank->x == cell.x && tank->y == cell.y) || (tank == shooter && hasHit)) {
                     applyDamage(tank);  // Aplicar daño al tanque
 
                     // Verificar si algún jugador ha perdido después de aplicar el daño
@@ -108,7 +108,7 @@ public:
                         return;  // Salir de la función si el juego termina
                     }
 
-                    hasHit = true;
+                    hasHit = true; // Indica que la bala ha golpeado
                     SetWindowText(hRouteText, pathText.c_str());
                     return;
                 }
@@ -118,7 +118,6 @@ public:
         // Mostrar la trayectoria completa en la interfaz
         SetWindowText(hRouteText, pathText.c_str());
     }
-
 
     // Función para aplicar el daño al tanque
     void applyDamage(Tank* tank) {
@@ -140,6 +139,23 @@ public:
         // Asegurarse de que la vida no baje de 0
         if (tank->health < 0) {
             tank->health = 0;
+        }
+    }
+
+    // Función para manejar el rebote de la bala
+    void rebote(int& x, int& y) {
+        // Si la bala alcanza los bordes del área de juego, invertir su dirección
+        if (x < 0) {
+            x = 1; // Rebote hacia la derecha
+        }
+        else if (x >= grafo.N) {
+            x = grafo.N - 2; // Rebote hacia la izquierda
+        }
+        if (y < 0) {
+            y = 1; // Rebote hacia abajo
+        }
+        else if (y >= grafo.N) {
+            y = grafo.N - 2; // Rebote hacia arriba
         }
     }
 };
