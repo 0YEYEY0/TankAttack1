@@ -1,6 +1,8 @@
 #pragma once
 #include <windows.h>
 #include <string>
+#include "Tank.h"
+
 
 // Declaración globales
 extern HWND hPowerUpText;  // Cuadro de texto para mostrar el Power-Up activo

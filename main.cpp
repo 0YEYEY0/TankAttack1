@@ -313,8 +313,8 @@ void UpdateTimer(HWND hwnd) {
 
     if (remainingTime <= 0) {
         // Condición de victoria por tiempo
-        int totalHealthP1 = tanks[0]->getHealth() + tanks[1]->getHealth();
-        int totalHealthP2 = tanks[2]->getHealth() + tanks[3]->getHealth();
+        int totalHealthP2 = tanks[0]->getHealth() + tanks[1]->getHealth();
+        int totalHealthP1 = tanks[2]->getHealth() + tanks[3]->getHealth();
 
         if (totalHealthP1 > totalHealthP2) {
             MessageBox(hwnd, L"Jugador 1 gana por salud restante", L"Victoria por tiempo", MB_OK);
