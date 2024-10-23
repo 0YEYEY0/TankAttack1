@@ -4,8 +4,8 @@
 #include "Grafo.h"
 #include <vector>
 
-// Variable global para rastrear el turno del jugador (1 o 2)
-int turnoJugador = 1;  // Comienza con el jugador 1 (rojo y azul)
+// Variable global para rastrear el turno del jugador 1 o 2
+int turnoJugador = 1;  // Comienza con el jugador 1 rojo y azul
 
 int vidaJugador1 = 0;  // Se inicializan después
 int vidaJugador2 = 0;  // Se inicializan después
@@ -15,7 +15,7 @@ int vidaJugador2 = 0;  // Se inicializan después
 class Tank {
 public:
     int x, y;  // Posición del tanque en el grafo
-    std::wstring tankText;  // Texto que representa el tanque (e.g., "TCE" para tanque celeste)
+    std::wstring tankText;  // Texto que representa el tanque 
     HWND hButton;  // El botón que representa el tanque
     int health;  // Vida del tanque
 
@@ -86,10 +86,10 @@ void cambiarTurno() {
 // Función para verificar si es el turno del jugador correcto
 bool esTurnoDelJugador(Tank* tank) {
     if (turnoJugador == 1) {
-        return tank->tankText == L"TRO" || tank->tankText == L"TAZ";  // Tanques de jugador 1 (rojo y azul)
+        return tank->tankText == L"TRO" || tank->tankText == L"TAZ";  // Tanques de jugador 1 rojo y azul
     }
     else {
-        return tank->tankText == L"TAM" || tank->tankText == L"TCE";  // Tanques de jugador 2 (amarillo y celeste)
+        return tank->tankText == L"TAM" || tank->tankText == L"TCE";  // Tanques de jugador 2 amarillo y celeste
     }
 }
 
@@ -117,7 +117,7 @@ int getVidaTotalJugador(int jugador, std::vector<Tank*>& tanks) {
     return vidaTotal;
 }
 
-// Función para verificar si un jugador ha perdido (todos sus tanques tienen 0 de vida)
+// Función para verificar si un jugador ha perdido todos sus tanques tienen 0 de vida
 bool verificarDerrota(std::vector<Tank*>& tanks) {
     int vidaJugador1 = getVidaTotalJugador(1, tanks);
     int vidaJugador2 = getVidaTotalJugador(2, tanks);

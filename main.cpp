@@ -1,26 +1,27 @@
-#define NOMINMAX  // Para evitar el conflicto con las macros max y min de windows.h
+#define NOMINMAX  
 #include <windows.h>
 #include "Grafo.h"
 #include "Tank.h"
 #include "Bala.h"
 #include <vector>
-#include <ctime>  // Para srand y rand
-#include <thread>  // Para std::this_thread::sleep_for
-#include <chrono>  // Para manejar el retraso de tiempo
+#include <ctime>  
+#include <thread>  
+#include <chrono>  
 #include "Mov.h"
+#include "P_Up.h"
 
 const int N = 5;  // Tamaño del grafo
 Grafo* grafo;
-std::vector<Tank*> tanks;  // Almacenamos los punteros a los tanques
+std::vector<Tank*> tanks;  // Almacena los punteros a los tanques
 Tank* selectedTank = nullptr;  // Tanque seleccionado para disparar o mover
 bool isMoving = false;  // Flag para manejar si se está moviendo un tanque
 bool isShooting = false;  // Flag para manejar si se está disparando
-int remainingTime = 300;  // Tiempo restante en segundos (5 minutos)
+int remainingTime = 300;  // Tiempo 
 
 HWND hRouteText;  // Cuadro de texto para mostrar la trayectoria de la bala
 HWND hDamageText;  // Cuadro de texto para mostrar el daño de los tanques
 HWND hTankHealth[4];  // Cuadros de texto para mostrar la vida de los 4 tanques
-HWND hTimerText;
+HWND hTimerText;    // Cuadro del temporizador
 
 
 void MoveTankWithTrajectory(Tank* tank, int targetX, int targetY, HWND hwnd);  // Nueva función para mostrar la trayectoria
@@ -30,7 +31,12 @@ void UpdateTankHealth();  // Función para actualizar la vida de los tanques en 
 void UpdateTimer(HWND hwnd);  // Actualizar el temporizador
 void MoveTank(Tank* tank, int targetX, int targetY, HWND hwnd);  // Declaración de MoveTank
 
-// Prototipos
+
+HWND hPowerUpText;  // Cuadro de texto para mostrar el power up activo
+HWND hPowerUpButton;  // Botón para aplicar power up
+
+
+
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 
 // Crear la ventana
@@ -68,8 +74,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 }
 
 void iniciarTemporizador(HWND hwnd) {
-    // Configurar el temporizador para que dispare un mensaje WM_TIMER cada 1000 ms (1 segundo)
-    SetTimer(hwnd, 1, 1000, NULL);  // 1 segundo = 1000 ms
+    // Configurar el temporizador para que dispare un mensaje WM_TIMER cada  1 segundo
+    SetTimer(hwnd, 1, 1000, NULL);  
 }
 
 
@@ -93,7 +99,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
                     NULL
                 );
 
-                // Si es obstáculo, marcar con "X"
+                // Si es obstáculo, marcar con X
                 if (grafo->grid[i][j] == 'X') {
                     SetWindowText(hButton, L"X");
                 }
@@ -115,7 +121,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         hFireButtons[2] = CreateWindow(L"BUTTON", L"Disparar Rojo", WS_VISIBLE | WS_CHILD, 500, 420, 120, 50, hwnd, (HMENU)1003, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
         hFireButtons[3] = CreateWindow(L"BUTTON", L"Disparar Azul", WS_VISIBLE | WS_CHILD, 500, 480, 120, 50, hwnd, (HMENU)1004, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
 
-        // Mover los cuadros de texto fuera de la cuadrícula del grafo
+        //  cuadros de texto 
         hRouteText = CreateWindow(L"EDIT", NULL, WS_VISIBLE | WS_CHILD | ES_MULTILINE | ES_READONLY, 50, 550, 400, 60, hwnd, NULL, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
         hDamageText = CreateWindow(L"EDIT", NULL, WS_VISIBLE | WS_CHILD | ES_MULTILINE | ES_READONLY, 50, 620, 400, 60, hwnd, NULL, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
 
@@ -136,6 +142,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         iniciarTemporizador(hwnd);  // Iniciar el temporizador del juego
 
 
+        // Crear botón para aplicar power up y cuadro de texto para mostrar el power-up aplicado
+        hPowerUpButton = CreateWindow(L"BUTTON", L"Usar Power-Up", WS_VISIBLE | WS_CHILD, 300, 700, 120, 50, hwnd, (HMENU)3001, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
+        hPowerUpText = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 600, 360, 200, 30, hwnd, NULL, (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
+
+
         break;
     }
 
@@ -149,7 +160,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
 
             // Mover el tanque si el flag de movimiento está activado
             if (isMoving) {
-                // Aquí llamamos a moveTankWithProbabilities en lugar de MoveTankWithTrajectory
+                // Aquí llamamos a moveTankWithProbabilities 
                 moveTankWithProbabilities(selectedTank, *grafo, hwnd, targetX, targetY, hRouteText);
                 isMoving = false;
                 cambiarTurno();  // Cambiar el turno después del movimiento
@@ -177,6 +188,12 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
                 MessageBox(hwnd, L"No es tu turno", L"Error", MB_OK);
             }
         }
+        /*
+        // Manejar Power-Up
+        if (id == 3001) {
+            aplicarPowerUp(hwnd);  // Función para asignar un Power-Up aleatorio al jugador actual
+        }
+        */
 
         // Manejar la selección de tanque para disparar
         if (id >= 1001 && id <= 1004) {
@@ -326,19 +343,19 @@ void UpdateTimer(HWND hwnd) {
             MessageBox(hwnd, L"Empate", L"Resultado", MB_OK);
         }
 
-        PostQuitMessage(0);  // Cerrar el juego
+        PostQuitMessage(0);  
     }
 
     // Verificar victoria por eliminación
-    int tanksAliveP1 = (tanks[0]->getHealth() > 0) + (tanks[1]->getHealth() > 0);
-    int tanksAliveP2 = (tanks[2]->getHealth() > 0) + (tanks[3]->getHealth() > 0);
+    int tanksAliveP2 = (tanks[0]->getHealth() > 0) + (tanks[1]->getHealth() > 0);
+    int tanksAliveP1 = (tanks[2]->getHealth() > 0) + (tanks[3]->getHealth() > 0);
 
     if (tanksAliveP1 == 0) {
-        MessageBox(hwnd, L"Jugador 2 gana por eliminación", L"Victoria por eliminación", MB_OK);
-        PostQuitMessage(0);  // Cerrar el juego
+        MessageBox(hwnd, L"Jugador 2 gana por eliminacion", L"Victoria por eliminacion", MB_OK);
+        PostQuitMessage(0);  
     }
     else if (tanksAliveP2 == 0) {
-        MessageBox(hwnd, L"Jugador 1 gana por eliminación", L"Victoria por eliminación", MB_OK);
-        PostQuitMessage(0);  // Cerrar el juego
+        MessageBox(hwnd, L"Jugador 1 gana por eliminacion", L"Victoria por eliminacion", MB_OK);
+        PostQuitMessage(0);  
     }
 }

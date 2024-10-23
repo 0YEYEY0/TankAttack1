@@ -1,14 +1,14 @@
 #pragma once
 #include <vector>
-#include <cstdlib>  // Para srand y rand
-#include <ctime>    // Para time()
-#include <iostream>  // Para std::cout y std::endl
+#include <cstdlib>  
+#include <ctime>    
+#include <iostream>  
 
 class Grafo {
 public:
     int N;  // Tamaño del grafo (NxN)
     std::vector<std::vector<int>> adjMatrix;  // Matriz de adyacencia
-    std::vector<std::vector<char>> grid;  // Representación de la cuadrícula ('O' = vacío, 'X' = obstáculo)
+    std::vector<std::vector<char>> grid;  // Representación de la cuadrícula 'O' = vacío, 'X' = obstáculo
 
     // Constructor
     Grafo(int size) : N(size) {
@@ -23,7 +23,7 @@ public:
         srand(static_cast<unsigned int>(time(0)));  // Inicializar generador de números aleatorios
         for (int i = 0; i < N; ++i) {
             for (int j = 0; j < N; ++j) {
-                if (rand() % 3 == 0) {  // Aproximadamente un 50% de probabilidad de ser obstáculo
+                if (rand() % 4 == 0) {  // Probabilidad de ser obstáculo
                     grid[i][j] = 'X';  // Colocar un obstáculo
                 }
             }
@@ -62,7 +62,6 @@ public:
         }
     }
 
-    // Imprimir la matriz de adyacencia (para depuración)
     void printAdjMatrix() const {
         for (int i = 0; i < N * N; ++i) {
             for (int j = 0; j < N * N; ++j) {

@@ -70,6 +70,57 @@ public:
         // Si no se encuentra un camino, devolver un vector vacío
         return {};
     }
+    /*
+    // Función A* para encontrar el camino más corto hacia el objetivo
+    std::vector<Cell> AStar(int startX, int startY, int targetX, int targetY) {
+        std::vector<std::vector<bool>> visited(grafo.N, std::vector<bool>(grafo.N, false));
+        std::vector<std::vector<int>> gScore(grafo.N, std::vector<int>(grafo.N, std::numeric_limits<int>::max()));
+        std::vector<std::vector<int>> fScore(grafo.N, std::vector<int>(grafo.N, std::numeric_limits<int>::max()));
+        std::priority_queue<std::pair<int, Cell>, std::vector<std::pair<int, Cell>>, std::greater<>> openSet;
+
+        gScore[startX][startY] = 0;
+        fScore[startX][startY] = heuristic(startX, startY, targetX, targetY);
+        openSet.push({ fScore[startX][startY], {startX, startY, {}} });
+
+        // Movimientos posibles: arriba, abajo, izquierda, derecha
+        int moves[4][2] = { {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
+
+        while (!openSet.empty()) {
+            Cell current = openSet.top().second;
+            openSet.pop();
+
+            if (current.x == targetX && current.y == targetY) {
+                return current.path;
+            }
+
+            visited[current.x][current.y] = true;
+
+            for (auto& move : moves) {
+                int newX = current.x + move[0];
+                int newY = current.y + move[1];
+
+                if (newX >= 0 && newX < grafo.N && newY >= 0 && newY < grafo.N && grafo.grid[newX][newY] != 'X' && !visited[newX][newY]) {
+                    int tentative_gScore = gScore[current.x][current.y] + 1;
+
+                    if (tentative_gScore < gScore[newX][newY]) {
+                        gScore[newX][newY] = tentative_gScore;
+                        fScore[newX][newY] = gScore[newX][newY] + heuristic(newX, newY, targetX, targetY);
+                        Cell nextCell = { newX, newY, current.path };
+                        nextCell.path.push_back({ newX, newY });
+                        openSet.push({ fScore[newX][newY], nextCell });
+                    }
+                }
+            }
+        }
+
+        return {};  // Si no se encuentra un camino
+    }
+    */
+
+    // Función heurística para A* (distancia Manhattan)
+    int heuristic(int x1, int y1, int x2, int y2) {
+        return abs(x1 - x2) + abs(y1 - y2);
+    }
 
     // Función para mover la bala usando BFS
     void moveBala() {

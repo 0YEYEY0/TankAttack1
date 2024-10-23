@@ -66,7 +66,7 @@ std::vector<int> Dijkstra(const Grafo& grafo, int start, int target, HWND hRoute
     return path;
 }
 
-// Función para realizar búsqueda BFS
+// Función para realizar busqueda BFS
 std::vector<int> BFS(const Grafo& grafo, int start, int target, HWND hRouteText) {
     int N = grafo.N;
     std::vector<int> dist(N * N, -1);
@@ -155,13 +155,13 @@ void moveTankWithProbabilities(Tank* tank, Grafo& grafo, HWND hwnd, int targetX,
     int target = targetX * grafo.N + targetY;   // Posición objetivo en el grafo
 
     if (tank->tankText == L"TCE" || tank->tankText == L"TAZ") {
-        // Tanques celeste y azul (50% de usar BFS, 50% movimiento aleatorio)
+        // Tanques celeste y azul 50% de usar BFS, 50% movimiento aleatorio
         if (randomValue < 50) {
             // Usar BFS y mover el tanque a la primera celda del camino
             std::vector<int> path = BFS(grafo, start, target, hRouteText);
 
             if (path.size() > 1) {
-                int nextPosition = path[1];  // Segunda posición en el camino (después de la inicial)
+                int nextPosition = path[1];  // Segunda posición en el camino después de la inicial
                 int nextX = nextPosition / grafo.N;
                 int nextY = nextPosition % grafo.N;
 
@@ -189,7 +189,7 @@ void moveTankWithProbabilities(Tank* tank, Grafo& grafo, HWND hwnd, int targetX,
             std::vector<int> path = Dijkstra(grafo, start, target, hRouteText);
 
             if (path.size() > 1) {
-                int nextPosition = path[1];  // Segunda posición en el camino (después de la inicial)
+                int nextPosition = path[1];  // Segunda posición en el camino después de la inicial
                 int nextX = nextPosition / grafo.N;
                 int nextY = nextPosition % grafo.N;
 
